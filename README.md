@@ -1,6 +1,6 @@
 # Fieldnotes Blog Manager
 
-A full-stack blog post manager with an ASP.NET Core API, a React + TypeScript frontend, and SQL Server persistence.
+A full-stack blog post manager with an ASP.NET Core API, a React + TypeScript frontend, and SQL Server.
 
 ## Stack
 
