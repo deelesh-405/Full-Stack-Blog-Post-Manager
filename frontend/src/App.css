@@ -288,6 +288,16 @@ h2 { margin: 0; color: var(--ink); font: 500 24px/1.2 var(--display); }
 .icon-button { width: 31px; height: 31px; display: grid; place-items: center; border: 0; border-radius: 4px; color: #758078; background: transparent; cursor: pointer; }
 .icon-button:hover { color: var(--green); background: #edf4ef; }
 .danger-action:hover { color: #bd5546; background: #fcf0ed; }
+.detail-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; color: #66736b; text-decoration: none; font: 600 11px/1 var(--ui); }
+.detail-back:hover { color: var(--green); }
+.detail-heading { align-items: flex-end; }
+.post-detail { max-width: 760px; margin: 0 auto; padding-bottom: 30px; }
+.post-detail-meta { display: flex; align-items: center; gap: 18px; margin-bottom: 24px; color: #7d8881; font: 500 11px/1 var(--ui); }
+.post-detail-meta > span { display: inline-flex; align-items: center; gap: 6px; }
+.post-detail-image { width: 100%; max-height: 430px; display: block; margin-bottom: 26px; border-radius: 6px; object-fit: cover; }
+.post-detail-excerpt { margin-bottom: 27px; padding-left: 18px; border-left: 2px solid #e6a18b; color: #69756e; font: 500 16px/1.65 var(--display); }
+.post-detail-content { color: #39463f; font: 400 15px/1.85 var(--ui); white-space: pre-wrap; }
+.post-not-found { max-width: 520px; }
 .table-message { min-height: 130px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 7px; color: #87918a; background: white; font: 400 12px/1.5 var(--ui); }
 .empty-message { padding: 25px; text-align: center; }
 .empty-message p { max-width: 390px; margin: 7px 0 0; }
@@ -349,6 +359,8 @@ h2 { margin: 0; color: var(--ink); font: 500 24px/1.2 var(--display); }
   .topbar-create { min-height: 32px; }
   .page-content { padding: 33px 18px 35px; }
   .page-heading { align-items: flex-start; margin-bottom: 26px; }
+  .detail-heading { flex-direction: column; }
+  .detail-heading > .button { display: inline-flex; }
   .page-heading > .button { display: none; }
   h1 { font-size: 31px; }
   .heading-subtitle { max-width: 290px; font-size: 12px; }

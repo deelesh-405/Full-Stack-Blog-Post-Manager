@@ -1,8 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { BrowserRouter, NavLink, Navigate, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import {
+  ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  CalendarDays,
   Eye,
   EyeOff,
   FileText,
@@ -27,6 +29,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="posts" element={<PostsPage />} />
             <Route path="posts/new" element={<PostEditor />} />
+            <Route path="posts/:id" element={<PostDetail />} />
             <Route path="posts/:id/edit" element={<PostEditor />} />
           </Route>
         </Route>
@@ -276,10 +279,10 @@ function PostTable({ posts, loading, onDelete, emptyLabel }: { posts: Post[]; lo
         <thead><tr><th>POST</th><th>STATUS</th><th>LAST UPDATED</th><th><span className="visually-hidden">Actions</span></th></tr></thead>
         <tbody>{posts.map((post) => (
           <tr key={post.id}>
-            <td><div className="post-title-cell"><span className={`post-monogram ${post.status === 1 ? 'published-monogram' : ''}`}>{post.title.trim().charAt(0).toUpperCase() || 'N'}</span><div><NavLink to={`/posts/${post.id}/edit`} className="post-title">{post.title}</NavLink><p className="post-slug">/{post.slug}</p></div></div></td>
+            <td><div className="post-title-cell"><span className={`post-monogram ${post.status === 1 ? 'published-monogram' : ''}`}>{post.title.trim().charAt(0).toUpperCase() || 'N'}</span><div><NavLink to={`/posts/${post.id}`} className="post-title">{post.title}</NavLink><p className="post-slug">/{post.slug}</p></div></div></td>
             <td><StatusBadge status={post.status} /></td>
             <td className="date-cell">{formatDate(post.updatedAt ?? post.createdAt)}</td>
-            <td><div className="row-actions"><NavLink to={`/posts/${post.id}/edit`} className="icon-button" aria-label={`Edit ${post.title}`} title="Edit post"><SquarePen size={16} /></NavLink>{onDelete && <button type="button" className="icon-button danger-action" onClick={() => onDelete(post)} aria-label={`Delete ${post.title}`} title="Delete post"><Trash2 size={16} /></button>}</div></td>
+            <td><div className="row-actions"><NavLink to={`/posts/${post.id}`} className="icon-button" aria-label={`View ${post.title}`} title="View post"><Eye size={16} /></NavLink><NavLink to={`/posts/${post.id}/edit`} className="icon-button" aria-label={`Edit ${post.title}`} title="Edit post"><SquarePen size={16} /></NavLink>{onDelete && <button type="button" className="icon-button danger-action" onClick={() => onDelete(post)} aria-label={`Delete ${post.title}`} title="Delete post"><Trash2 size={16} /></button>}</div></td>
           </tr>
         ))}</tbody>
       </table>
@@ -289,6 +292,54 @@ function PostTable({ posts, loading, onDelete, emptyLabel }: { posts: Post[]; lo
 
 function StatusBadge({ status }: { status: PostStatus }) {
   return <span className={`status-badge ${status === 1 ? 'badge-published' : 'badge-draft'}`}><span />{status === 1 ? 'Published' : 'Draft'}</span>
+}
+
+function PostDetail() {
+  const { id } = useParams()
+  const [post, setPost] = useState<Post | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const controller = new AbortController()
+    api.get<Post>(`/posts/${id}`, { signal: controller.signal })
+      .then(({ data }) => setPost(data))
+      .catch(() => {
+        if (!controller.signal.aborted) setError('This post could not be found.')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false)
+      })
+    return () => controller.abort()
+  }, [id])
+
+  if (loading) return <div className="table-message">Loading post…</div>
+  if (error || !post) {
+    return <div className="post-not-found"><p className="notice notice-error" role="alert">{error || 'This post could not be found.'}</p><NavLink to="/posts" className="text-link"><ArrowLeft size={16} /> Back to all posts</NavLink></div>
+  }
+
+  return (
+    <>
+      <div className="page-heading detail-heading">
+        <div>
+          <NavLink to="/posts" className="detail-back"><ArrowLeft size={15} /> All posts</NavLink>
+          <p className="eyebrow">YOUR LIBRARY / VIEW</p>
+          <h1>{post.title}</h1>
+          <p className="heading-subtitle">/{post.slug}</p>
+        </div>
+        <NavLink to={`/posts/${post.id}/edit`} className="button button-dark"><SquarePen size={16} /> Edit post</NavLink>
+      </div>
+      <article className="post-detail">
+        <div className="post-detail-meta">
+          <StatusBadge status={post.status} />
+          <span><CalendarDays size={15} /> {formatDate(post.updatedAt ?? post.createdAt)}</span>
+        </div>
+        {post.featuredImageUrl && <img className="post-detail-image" src={post.featuredImageUrl} alt={post.title} />}
+        {post.excerpt && <p className="post-detail-excerpt">{post.excerpt}</p>}
+        <div className="post-detail-content">{post.content}</div>
+      </article>
+    </>
+  )
 }
 
 function PostEditor() {

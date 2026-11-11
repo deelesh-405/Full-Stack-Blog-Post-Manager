@@ -16,16 +16,19 @@ public class AuthService : IAuthService
 
     public bool ValidateCredentials(string username, string password)
     {
-        var configuredUsername = _configuration["Auth:Username"] ?? "admin";
-        var configuredPassword = _configuration["Auth:Password"] ?? "Password123!";
+        var configuredUsername = _configuration["Auth:Username"];
+        var configuredPassword = _configuration["Auth:Password"];
 
-        return string.Equals(username, configuredUsername, StringComparison.OrdinalIgnoreCase)
+        return configuredUsername is not null
+            && configuredPassword is not null
+            && string.Equals(username, configuredUsername, StringComparison.OrdinalIgnoreCase)
             && string.Equals(password, configuredPassword, StringComparison.Ordinal);
     }
 
     public string CreateToken(string username)
     {
-        var jwtKey = _configuration["Jwt:Key"] ?? "ThisIsA32CharacterLongSecretKey123";
+        var jwtKey = _configuration["Jwt:Key"]
+            ?? throw new InvalidOperationException("Jwt:Key must be configured.");
         var issuer = _configuration["Jwt:Issuer"] ?? "Fieldnotes";
         var audience = _configuration["Jwt:Audience"] ?? "FieldnotesClient";
         var expiryMinutes = _configuration.GetValue<int>("Jwt:ExpiryMinutes", 60);

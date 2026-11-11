@@ -32,6 +32,26 @@ public class BlogPostsIntegrationTests : IClassFixture<CustomWebApplicationFacto
     }
 
     [Fact]
+    public async Task GetPosts_WithoutToken_ShouldReturnUnauthorized()
+    {
+        var response = await _client.GetAsync("/api/posts");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_PreflightAllowsConfiguredFrontendOrigin()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Options, "/api/auth/login");
+        request.Headers.Add("Origin", "http://localhost:5173");
+        request.Headers.Add("Access-Control-Request-Method", "POST");
+
+        var response = await _client.SendAsync(request);
+
+        Assert.Equal("http://localhost:5173", response.Headers.GetValues("Access-Control-Allow-Origin").Single());
+    }
+
+    [Fact]
     public async Task CreatePost_ShouldReturnCreated()
     {
         await AuthenticateAsync();
@@ -91,6 +111,16 @@ public class BlogPostsIntegrationTests : IClassFixture<CustomWebApplicationFacto
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    public CustomWebApplicationFactory()
+    {
+        Environment.SetEnvironmentVariable("Auth__Username", "admin");
+        Environment.SetEnvironmentVariable("Auth__Password", "Password123!");
+        Environment.SetEnvironmentVariable("Jwt__Key", "IntegrationTestsNeedA32ByteSigningKey");
+        Environment.SetEnvironmentVariable("Jwt__Issuer", "Fieldnotes");
+        Environment.SetEnvironmentVariable("Jwt__Audience", "FieldnotesClient");
+        Environment.SetEnvironmentVariable("Cors__AllowedOrigins__0", "http://localhost:5173");
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");

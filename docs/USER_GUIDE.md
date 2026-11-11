@@ -25,9 +25,11 @@ A fresh database is populated with four sample posts: three published posts and 
 
 ## Manage posts
 
-The **All posts** page lists every post and its status. Search by text, filter by **Published** or **Draft**, edit an item using its title or edit control, or delete it. Deletion asks for confirmation and cannot be undone.
+The **All posts** page lists every post and its status. Search by text and filter by **Published** or **Draft**. Select a post title or its view control to read the full post, including its excerpt and featured image. From the detail page, choose **Edit post** to update it. The library's edit control opens the editor directly; its delete control asks for confirmation, and deletion cannot be undone.
 
 ![Post library with search and status filter](images/posts.png)
+
+![Read-only post detail with featured image](images/post-detail.png)
 
 To create a post, choose **New post** and enter a title and story. Excerpt and featured image URL are optional. Set the status to **Draft** to keep working privately or **Published** to publish it, then choose **Create post**. When editing an existing post, choose **Save changes** to apply updates.
 

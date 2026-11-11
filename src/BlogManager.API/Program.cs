@@ -15,9 +15,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "ThisIsA32CharacterLongSecretKey123";
+var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Fieldnotes";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "FieldnotesClient";
+
+if (string.IsNullOrWhiteSpace(jwtKey) || Encoding.UTF8.GetByteCount(jwtKey) < 32)
+{
+    throw new InvalidOperationException("Jwt:Key must be configured with at least 32 bytes.");
+}
+
+if (string.IsNullOrWhiteSpace(builder.Configuration["Auth:Username"])
+    || string.IsNullOrWhiteSpace(builder.Configuration["Auth:Password"]))
+{
+    throw new InvalidOperationException("Auth:Username and Auth:Password must be configured.");
+}
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+if (allowedOrigins.Length == 0)
+{
+    throw new InvalidOperationException("Cors:AllowedOrigins must contain at least one frontend origin.");
+}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -101,7 +118,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyMethod()
             .AllowAnyHeader();
     });

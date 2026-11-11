@@ -18,7 +18,7 @@ A full-stack blog post manager with an ASP.NET Core API, a React + TypeScript fr
 
 The API waits for SQL Server's health check before starting. Its initial schema is created from the EF Core model; once migrations are added, startup applies them instead. SQL Server data persists in the `sqlserver-data` volume.
 
-For the demo sign-in and the main content-management workflows, see the [User Guide](docs/USER_GUIDE.md). The seeded demo account is `admin` / `Password123!`; change these credentials and the JWT signing key before any non-local deployment.
+For the demo sign-in and the main content-management workflows, see the [User Guide](docs/USER_GUIDE.md). The `admin` / `Password123!` account and signing key are loaded only in Development. For Production, configure `Auth__Username`, `Auth__Password`, a unique `Jwt__Key` of at least 32 bytes, and `Cors__AllowedOrigins__0` for the frontend origin; startup fails if these values are missing.
 
 ## Run locally
 
