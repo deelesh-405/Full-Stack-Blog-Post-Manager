@@ -1,30 +1,116 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { BrowserRouter, NavLink, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { BrowserRouter, NavLink, Navigate, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowRight,
   ArrowUpRight,
+  Eye,
+  EyeOff,
   FileText,
   LayoutDashboard,
+  Lock,
+  LogOut,
   Plus,
   Search,
   SquarePen,
   Trash2,
 } from 'lucide-react'
-import { api, type DashboardSummary, type Post, type PostStatus } from './api'
+import { api, getAuthToken, logout, setAuthToken, type DashboardSummary, type Post, type PostStatus } from './api'
 import './App.css'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<WorkspaceLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="posts" element={<PostsPage />} />
-          <Route path="posts/new" element={<PostEditor />} />
-          <Route path="posts/:id/edit" element={<PostEditor />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<WorkspaceLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="posts" element={<PostsPage />} />
+            <Route path="posts/new" element={<PostEditor />} />
+            <Route path="posts/:id/edit" element={<PostEditor />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
+  )
+}
+
+function ProtectedRoute() {
+  const token = getAuthToken()
+  return token ? <Outlet /> : <Navigate to="/login" replace />
+}
+
+function LoginPage() {
+  const navigate = useNavigate()
+  const [username, setUsername] = useState('admin')
+  const [password, setPassword] = useState('Password123!')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (getAuthToken()) {
+      navigate('/', { replace: true })
+    }
+  }, [navigate])
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError('')
+    setSubmitting(true)
+
+    try {
+      const { data } = await api.post<{ token: string; username: string }>('/auth/login', { username, password })
+      setAuthToken(data.token)
+      navigate('/', { replace: true })
+    } catch {
+      setError('Invalid username or password. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="auth-shell">
+      <div className="auth-card">
+        <div className="auth-brand">
+          <span className="brand-mark">f.</span>
+          <span>fieldnotes</span>
+        </div>
+        <p className="auth-kicker">SIGN IN</p>
+        <h1>Welcome back</h1>
+        <p className="auth-subtitle">Use your content studio account to continue.</p>
+
+        <form className="login-form" onSubmit={handleLogin}>
+          {error && <p className="notice notice-error" role="alert">{error}</p>}
+          <label className="field-label">
+            Username
+            <input className="text-input" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required />
+          </label>
+          <div className="field-label">
+            <label htmlFor="login-password">Password</label>
+            <div className="password-input-wrap">
+              <input id="login-password" className="text-input password-input" type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+              <button
+                className="password-toggle"
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+          <button className="button button-primary" type="submit" disabled={submitting}>
+            <Lock size={16} /> {submitting ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+
+        <p className="demo-credentials">
+          Demo access: <strong>admin</strong> / <strong>Password123!</strong>
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -48,7 +134,17 @@ function WorkspaceLayout() {
         <div className="sidebar-bottom">
           <span className="status-dot" />
           <span>Content studio</span>
-          <span className="sidebar-version">v1.0</span>
+          <button
+            type="button"
+            className="logout-button"
+            onClick={() => {
+              logout()
+              window.location.href = '/login'
+            }}
+          >
+            <LogOut size={14} />
+            <span>Sign out</span>
+          </button>
         </div>
       </aside>
       <main className="main-area">

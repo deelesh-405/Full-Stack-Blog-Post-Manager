@@ -18,6 +18,8 @@ A full-stack blog post manager with an ASP.NET Core API, a React + TypeScript fr
 
 The API waits for SQL Server's health check before starting. Its initial schema is created from the EF Core model; once migrations are added, startup applies them instead. SQL Server data persists in the `sqlserver-data` volume.
 
+For the demo sign-in and the main content-management workflows, see the [User Guide](docs/USER_GUIDE.md). The seeded demo account is `admin` / `Password123!`; change these credentials and the JWT signing key before any non-local deployment.
+
 ## Run locally
 
 The API uses the InMemory provider by default in `appsettings.json`, so no SQL Server is needed for a quick local run:
@@ -38,8 +40,11 @@ The Vite app uses `http://localhost:5020/api` by default. Override it with `VITE
 
 ## API
 
+Authenticate with `POST /api/auth/login` using `{ "username": "admin", "password": "Password123!" }` to receive a JWT. Include it as a bearer token when calling the protected post endpoints below.
+
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
+| `POST` | `/api/auth/login` | Authenticate and receive a JWT |
 | `GET` | `/api/posts?page=1&pageSize=10&search=&status=` | List, search, filter, and paginate posts |
 | `GET` | `/api/posts/dashboard` | Dashboard counts and recent posts |
 | `GET` | `/api/posts/{id}` | Get a post |
@@ -47,7 +52,7 @@ The Vite app uses `http://localhost:5020/api` by default. Override it with `VITE
 | `PUT` | `/api/posts/{id}` | Update a post |
 | `DELETE` | `/api/posts/{id}` | Delete a post |
 
-Statuses are numeric: `0` for Draft and `1` for Published. Slugs are generated from titles and must be unique.
+All `/api/posts` endpoints require authentication. Statuses are numeric: `0` for Draft and `1` for Published. Slugs are generated from titles and must be unique.
 
 ## Tests and frontend checks
 

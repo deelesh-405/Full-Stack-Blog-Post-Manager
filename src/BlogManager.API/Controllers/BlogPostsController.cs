@@ -1,10 +1,12 @@
 using BlogManager.API.DTOs;
 using BlogManager.API.Enums;
 using BlogManager.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlogManager.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/posts")]
 public class BlogPostsController : ControllerBase
